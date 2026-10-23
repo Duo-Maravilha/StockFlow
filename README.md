@@ -796,7 +796,7 @@ Posteriormente serão implementados os movimentos de stock, segurança, históri
 
 ## 👨‍💻 Autor
 
-**[Nome do autor]**
+**Daniel Silva e Luigy Lima**
 
 Projeto desenvolvido como parte do portefólio académico/profissional.
 
