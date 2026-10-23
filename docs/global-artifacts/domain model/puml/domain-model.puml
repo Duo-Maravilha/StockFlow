@@ -1,0 +1,117 @@
+@startuml
+top to bottom direction
+
+skinparam titleFontSize 25
+title <u>Domain Model [DDD]]</u>
+
+hide methods
+skinparam classAttributeIconSize 0
+
+package "<<aggregate>> Category"{
+
+    entity Category <<entity>> <<root>>
+
+    class Category_Name <<(V, #FF8B40) value object>>
+    class Category_Status <<(V, #FF8B40) value object>>
+
+    Category --> Category_Name
+    Category --> Category_Status
+}
+
+package "<<aggregate>> Product"{
+
+    entity Product <<entity>> <<root>>
+
+    class Product_ID <<(V, #FF8B40) value object>>
+    class Product_Name <<(V, #FF8B40) value object>>
+    class Product_SKU <<(V, #FF8B40) value object>>
+    class Product_Description <<(V, #FF8B40) value object>>
+    class Product_CostPrice <<(V, #FF8B40) value object>>
+    class Product_SalePrice <<(V, #FF8B40) value object>>
+    class Product_Quantity <<(V, #FF8B40) value object>>
+    class Product_MinStock <<(V, #FF8B40) value object>>
+    class Product_Status <<(V, #FF8B40) value object>>
+    class Product_CreatedAt <<(V, #FF8B40) value object>>
+
+    Product ----> Product_ID
+    Product ----> Product_Name
+    Product ----> Product_SKU
+    Product ----> Product_Description
+    Product ----> Product_CostPrice
+    Product ----> Product_SalePrice
+    Product ----> Product_Quantity
+    Product ----> Product_MinStock
+    Product ----> Product_Status
+    Product ----> Product_CreatedAt
+}
+
+package "<<aggregate>> StockMovement"{
+
+    entity StockMovement <<entity>> <<root>>
+
+    class StockMovement_ID <<(V, #FF8B40) value object>>
+    class StockMovement_Quantity <<(V, #FF8B40) value object>>
+    class StockMovement_Type <<(E, #4C0099) value object>>
+
+    note right of StockMovement_Type
+    Arrival
+    Departure
+    end note
+
+    class StockMovement_DateHour <<(V, #FF8B40) value object>>
+    class StockMovement_OptionalDocument <<(V, #FF8B40) value object>>
+    class StockMovement_OptionalReference <<(V, #FF8B40) value object>>
+
+    StockMovement ---> StockMovement_Type
+    StockMovement ---> StockMovement_ID
+    StockMovement ---> StockMovement_Quantity
+    StockMovement ---> StockMovement_DateHour
+    StockMovement ----> StockMovement_OptionalDocument
+    StockMovement ----> StockMovement_OptionalReference
+}
+
+package "<<aggregate>> Supplier"{
+
+    entity Supplier <<entity>> <<root>>
+
+    class Supplier_Name <<(V, #FF8B40) value object>>
+    class Supplier_NIF <<(V, #FF8B40) value object>>
+    class Supplier_Email <<(V, #FF8B40) value object>>
+    class Supplier_Phone <<(V, #FF8B40) value object>>
+
+    entity Address <<entity>>
+
+    class Address_Street <<(V, #FF8B40) value object>>
+    class Address_City <<(V, #FF8B40) value object>>
+    class Address_PostalCode <<(V, #FF8B40) value object>>
+    class Address_Country <<(V, #FF8B40) value object>>
+
+    Address -> Address_Street
+    Address --> Address_City
+    Address -l-> Address_PostalCode
+    Address -d-> Address_Country
+
+    Supplier "1" --> "1" Address
+    Supplier --> Supplier_Name
+    Supplier --> Supplier_NIF
+    Supplier --> Supplier_Email
+    Supplier --> Supplier_Phone
+}
+
+package "<<aggregate>> User"{
+
+    entity User <<entity>> <<root>>
+
+    class User_Email <<(V, #FF8B40) value object>>
+    class User_Status <<(V, #FF8B40) value object>>
+
+    User --> User_Email
+    User --> User_Status
+}
+
+    Product "*" ---> "1" Category
+    StockMovement "*" --> "1" User
+    StockMovement "*" -> "1" Product
+    StockMovement "*" -> "1" Supplier
+
+@enduml
