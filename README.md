@@ -1,328 +1,817 @@
-# StockFlow - Inventory Management System
-
-A backend application for managing warehouse inventory, products, suppliers, and stock movements, built with Java and Spring Boot.
-
-StockFlow aims to help small and medium-sized businesses manage their inventory efficiently, maintain accurate stock records, and track every stock movement through a centralized REST API.
-
-Project status: In development
-Table of Contents
-Overview
-Features
-Technology Stack
-Architecture
-Data Model
-Getting Started
-Configuration
-API Endpoints
-Business Rules
-Testing
-Project Roadmap
-Future Improvements
-Contributing
-License
-Overview
-
-Managing inventory using spreadsheets can lead to inaccurate stock levels, duplicated records, and a lack of traceability.
-
-StockFlow is designed to address these challenges by providing a structured inventory management system with a RESTful API, relational database, authentication, and stock movement tracking.
-
-The project is also an opportunity to apply software engineering principles, including layered architecture, data validation, transaction management, automated testing, and API documentation.
-
-Features
-Product Management
-Create, retrieve, update, and deactivate products.
-Assign unique SKU codes to products.
-Manage product categories.
-Store purchase prices, selling prices, and minimum stock levels.
-Search, filter, sort, and paginate product listings.
-Supplier Management
-Register and manage suppliers.
-Store supplier contact information and tax identification details.
-Associate stock receipts with their suppliers.
-Inventory Management
-Register stock entries and stock withdrawals.
-Track current stock quantities.
-Prevent withdrawals that exceed available inventory.
-Identify products that have reached or fallen below their minimum stock levels.
-Maintain a history of inventory movements.
-Security and Access Control
-Authenticate users.
-Define administrator and warehouse employee roles.
-Restrict operations according to user permissions.
-Protect sensitive credentials.
-Traceability
-Record the date and time of stock movements.
-Associate each movement with the responsible user.
-Preserve inventory history for auditing and troubleshooting.
-Technology Stack
-Technology	Purpose
-Java 21	Main programming language
-Spring Boot	Application framework
-Spring Web	REST API development
-Spring Data JPA	Data persistence
-Spring Security	Authentication and authorization
-Bean Validation	Request and data validation
-PostgreSQL	Relational database
-Maven	Dependency and build management
-JUnit 5	Automated testing
-Mockito	Unit testing and mocking
-Swagger / OpenAPI	API documentation
-Docker	Containerization
-GitHub Actions	Continuous integration
-
-The stack represents the intended technology choices. Individual components may be introduced progressively during development.
-
-Architecture
-
-StockFlow follows a layered architecture to separate responsibilities and make the application easier to maintain and test.
-
-src/main/java/
-└── com/stockflow/
-    ├── controller/
-    ├── service/
-    ├── repository/
-    ├── entity/
-    ├── dto/
-    ├── mapper/
-    ├── exception/
-    ├── config/
-    └── security/
+# StockFlow
+
+> Sistema de Gestão de Inventário e Armazém
+
+O **StockFlow** é uma aplicação de gestão de inventário desenvolvida para uma pequena empresa de distribuição comercial que pretende substituir o controlo de stock realizado através de folhas de cálculo por uma solução centralizada, segura e consistente.
+
+O projeto disponibiliza uma **API REST** para gestão de produtos, categorias, fornecedores, stock, movimentos de entrada e saída, utilizadores e histórico de operações.
+
+O principal objetivo é garantir que o inventário se mantém atualizado, que todas as operações ficam devidamente registadas e que os diferentes utilizadores possuem apenas as permissões que lhes são atribuídas.
+
+---
+
+## 📋 Índice
+
+- [Sobre o projeto](#-sobre-o-projeto)
+- [Objetivos](#-objetivos)
+- [Funcionalidades](#-funcionalidades)
+- [Tecnologias](#-tecnologias)
+- [Arquitetura](#-arquitetura)
+- [Modelo de dados](#-modelo-de-dados)
+- [API REST](#-api-rest)
+- [Regras de negócio](#-regras-de-negócio)
+- [Segurança](#-segurança)
+- [Validação e tratamento de erros](#-validação-e-tratamento-de-erros)
+- [Testes](#-testes)
+- [Pré-requisitos](#-pré-requisitos)
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Execução](#-execução)
+- [Docker](#-docker)
+- [Documentação da API](#-documentação-da-api)
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Critérios de aceitação](#-critérios-de-aceitação)
+- [Roadmap](#-roadmap)
+- [Autor](#-autor)
+- [Licença](#-licença)
+
+---
+
+## 📦 Sobre o projeto
+
+Uma empresa de distribuição comercializa produtos para diferentes clientes e atualmente utiliza folhas de cálculo para controlar o inventário.
+
+Este processo apresenta vários problemas:
+
+- dificuldade em saber o stock disponível;
+- existência de produtos duplicados;
+- falta de documentação adequada das entradas e saídas;
+- dificuldade em identificar produtos com stock reduzido;
+- dificuldade em consultar o histórico de movimentos;
+- ausência de controlo de acesso para os funcionários.
 
-Layer Responsibilities
-Controller: Handles HTTP requests and returns appropriate responses.
-Service: Implements business rules and coordinates transactions.
-Repository: Handles database access using Spring Data JPA.
-Entity: Represents persistent domain objects.
-DTO: Defines the data exchanged through the API.
-Mapper: Converts between entities and DTOs.
-Exception: Provides consistent error handling.
-Config: Contains application configuration.
-Security: Handles authentication and authorization.
+O **StockFlow** pretende resolver estes problemas através de uma aplicação centralizada com uma API REST, persistência em PostgreSQL, regras de negócio implementadas no backend e controlo de acesso baseado em perfis.
+
+---
 
-The package structure may evolve as the project grows.
+## 🎯 Objetivos
 
-Data Model
+O sistema deverá permitir:
 
-The initial domain model includes the following entities:
+- gerir produtos;
+- gerir categorias;
+- gerir fornecedores;
+- controlar entradas de stock;
+- controlar saídas de stock;
+- consultar o inventário;
+- pesquisar e filtrar produtos;
+- identificar produtos com stock reduzido;
+- consultar o histórico de movimentos;
+- gerir utilizadores;
+- controlar permissões;
+- disponibilizar uma API REST documentada;
+- garantir a integridade dos dados;
+- manter as operações de stock transacionais.
 
-Entity	Description
-Product	Product information, pricing, SKU, and stock levels
-Category	Product classification
-Supplier	Supplier information
-StockMovement	Inventory entries and withdrawals
-User	Application users and access roles
-Main Relationships
-A category can contain multiple products.
-A supplier can be associated with multiple stock receipts.
-A product can have multiple stock movements.
-A user can be responsible for multiple stock movements.
+---
 
-Database constraints and transaction boundaries are used to protect data integrity.
+## ✨ Funcionalidades
 
-Getting Started
-Prerequisites
+### Produtos
 
-Before running the application, install:
+- Criar produtos;
+- Consultar produtos;
+- Atualizar produtos;
+- Ativar/desativar produtos;
+- Pesquisar por nome ou SKU;
+- Filtrar por categoria e estado;
+- Ordenar resultados;
+- Paginar resultados;
+- Identificar produtos com stock reduzido.
 
-Java 21 or a compatible supported Java LTS release.
-Maven 3.9 or later.
-PostgreSQL.
-Git.
+Cada produto possui, entre outros, os seguintes dados:
 
-Docker can also be used if container configuration is available.
+| Campo | Descrição |
+|---|---|
+| `id` | Identificador único |
+| `sku` | Código único do produto |
+| `name` | Nome comercial |
+| `description` | Descrição opcional |
+| `category` | Categoria do produto |
+| `costPrice` | Preço de custo |
+| `salePrice` | Preço de venda |
+| `quantity` | Stock atual |
+| `minimumStock` | Stock mínimo |
+| `active` | Estado do produto |
+| `createdAt` | Data de criação |
 
-1. Clone the Repository
-git clone https://github.com/YOUR_USERNAME/stockflow.git
-cd stockflow
+### Categorias
 
+Permite:
 
-Replace YOUR_USERNAME with your GitHub username and adjust the repository name if necessary.
+- criar categorias;
+- consultar categorias;
+- editar categorias;
+- desativar categorias;
+- associar produtos a categorias.
 
-2. Create the Database
+### Fornecedores
 
-Connect to PostgreSQL and create a database:
+Permite gerir:
 
-CREATE DATABASE stockflow;
+- nome;
+- NIF;
+- email;
+- telefone;
+- morada.
 
+Os fornecedores podem ser associados às entradas de mercadoria.
 
-Create a dedicated database user and grant it the necessary privileges for your environment.
+### Entradas de stock
 
-3. Configure Environment Variables
+Cada entrada regista:
 
-Configure the following environment variables:
+- produto;
+- quantidade recebida;
+- fornecedor;
+- data e hora;
+- utilizador responsável;
+- referência documental opcional;
+- observações opcionais.
 
-DB_URL=jdbc:postgresql://localhost:5432/stockflow
-DB_USERNAME=your_database_user
-DB_PASSWORD=your_database_password
+A atualização do stock e o registo do movimento devem ocorrer dentro da mesma transação.
+
+### Saídas de stock
+
+As saídas permitem retirar produtos do inventário, respeitando as regras de negócio definidas.
+
+Uma saída:
+
+- deve possuir quantidade superior a zero;
+- não pode ultrapassar o stock disponível;
+- fica associada ao utilizador responsável;
+- deve permitir reconstruir a evolução do stock.
+
+### Histórico
+
+Cada produto possui um histórico dos seus movimentos, incluindo:
+
+- tipo de movimento;
+- quantidade;
+- data;
+- hora;
+- utilizador responsável;
+- stock anterior;
+- stock posterior.
+
+Os movimentos históricos não devem ser alterados livremente.
+
+### Alertas de stock
+
+O sistema identifica automaticamente produtos cujo stock seja:
+
+```text
+stock atual <= stock mínimo
+```
 
+Por exemplo:
 
-These values should be mapped to the application's Spring configuration.
+```text
+Stock atual: 4
+Stock mínimo: 5
+
+→ Produto com stock reduzido
+```
 
-For example, in application.properties:
+---
 
-spring.datasource.url=${DB_URL}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
+## 🛠️ Tecnologias
 
+### Obrigatórias
 
-Never commit production credentials or other secrets to the repository.
+| Tecnologia | Utilização |
+|---|---|
+| Java 21+ | Linguagem de programação |
+| Spring Boot | Framework principal |
+| Spring Web | API REST |
+| Spring Data JPA | Persistência |
+| Spring Security | Autenticação e autorização |
+| Bean Validation | Validação dos pedidos |
+| PostgreSQL | Base de dados |
+| Maven | Gestão do projeto |
+| JUnit 5 | Testes |
+| Mockito | Testes unitários |
+| Swagger / OpenAPI | Documentação da API |
+| Git / GitHub | Versionamento |
+
+### Recomendadas
+
+- Flyway — migrações da base de dados;
+- Docker;
+- Docker Compose;
+- Testcontainers;
+- GitHub Actions;
+- SonarQube ou ferramenta equivalente de análise estática.
 
-4. Build the Application
-./mvnw clean install
+---
 
+## 🏗️ Arquitetura
+
+O projeto segue uma arquitetura por camadas, separando responsabilidades entre os diferentes componentes da aplicação.
+
+```text
+┌──────────────────────────────┐
+│          Cliente             │
+│ Postman / Swagger / Frontend │
+└──────────────┬───────────────┘
+               │ HTTP / JSON
+               ▼
+┌──────────────────────────────┐
+│        Controllers           │
+│   REST endpoints + validação │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│          Services            │
+│   Regras de negócio +        │
+│       transações             │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│        Repositories          │
+│       Spring Data JPA        │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│         PostgreSQL           │
+│     Dados persistentes       │
+└──────────────────────────────┘
+```
 
-On Windows, use:
+### Responsabilidades
 
-mvnw.cmd clean install
+#### Controller
 
+Responsável por:
 
-If the Maven Wrapper is not included, use an installed Maven version:
+- receber pedidos HTTP;
+- validar os dados de entrada;
+- devolver respostas HTTP;
+- encaminhar as operações para os services.
 
-mvn clean install
+#### Service
 
-5. Run the Application
-./mvnw spring-boot:run
+Responsável por:
 
+- implementar as regras de negócio;
+- controlar operações transacionais;
+- validar operações de stock;
+- coordenar diferentes repositories.
 
-On Windows:
+#### Repository
 
-mvnw.cmd spring-boot:run
+Responsável por:
 
+- acesso à base de dados;
+- operações CRUD;
+- consultas específicas;
+- persistência através do Spring Data JPA.
 
-The default Spring Boot port is usually 8080, unless configured otherwise.
+---
 
-Note: These instructions describe the intended setup. Database configuration, environment variables, and startup commands should be verified against the implemented version of the project.
+## 🗄️ Modelo de dados
 
-Configuration
+O modelo contempla, no mínimo, as seguintes entidades:
 
-Application settings should be managed through environment variables or external configuration.
+```text
+User
+ │
+ │
+ └──────────────┐
+                │
+                ▼
+         StockMovement
+          │         │
+          │         │
+          ▼         ▼
+       Product   Supplier
+          │
+          │
+          ▼
+       Category
+```
 
-Typical settings include:
+### Entidades principais
 
-Variable	Description
-DB_URL	PostgreSQL JDBC connection URL
-DB_USERNAME	Database username
-DB_PASSWORD	Database password
-SERVER_PORT	HTTP server port
+#### Product
 
-Do not store credentials in version-controlled configuration files.
+Representa um produto existente no inventário.
 
-For development, use a dedicated local database and test configuration.
+Principais atributos:
 
-API Endpoints
+- ID;
+- SKU;
+- nome;
+- descrição;
+- preço de custo;
+- preço de venda;
+- quantidade;
+- stock mínimo;
+- estado;
+- data de criação.
 
-The following endpoints define the planned REST API.
+#### Category
 
-Method	Endpoint	Description
-POST	/api/products	Create a product
-GET	/api/products	List and search products
-GET	/api/products/{id}	Retrieve a product
-PUT	/api/products/{id}	Update a product
-PATCH	/api/products/{id}/status	Change product status
-POST	/api/stock-movements/inbound	Register a stock entry
-POST	/api/stock-movements/outbound	Register a stock withdrawal
-GET	/api/products/{id}/movements	Retrieve product movement history
-GET	/api/products/low-stock	List products with low stock
-POST	/api/auth/login	Authenticate a user
+Representa a categoria de um produto.
 
-The endpoint list represents the planned API contract. Routes should be updated as implementation progresses.
+#### Supplier
 
-API Documentation
+Representa um fornecedor de mercadoria.
 
-When OpenAPI integration is configured, the interactive API documentation should be available at:
+#### StockMovement
 
-http://localhost:8080/swagger-ui/index.html
+Representa uma entrada ou saída de stock.
 
-Business Rules
+#### User
 
-The application is designed around the following business rules:
+Representa um utilizador da aplicação, incluindo as respetivas credenciais, perfil e estado.
 
-Product SKU codes must be unique.
-Prices cannot be negative.
-Stock quantities cannot be negative.
-Stock withdrawals cannot exceed available inventory.
-Stock movements must be recorded with the corresponding inventory update.
-Failed stock operations must not leave partially updated data.
-Every stock movement must be associated with a responsible user.
-Products with stock at or below the minimum threshold must be identifiable.
-Historical stock movements must remain traceable.
-Administrative operations must be restricted to authorized users.
+As relações, chaves primárias, chaves estrangeiras e restrições devem ser definidas no modelo de dados da aplicação.
 
-These rules should be enforced on the server side and covered by automated tests.
+---
 
-Testing
+## 🌐 API REST
 
-The project aims to include unit tests and integration tests.
+### Produtos
 
-Unit Tests
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/api/products` | Criar produto |
+| `GET` | `/api/products` | Listar/pesquisar produtos |
+| `GET` | `/api/products/{id}` | Consultar produto |
+| `PUT` | `/api/products/{id}` | Atualizar produto |
+| `PATCH` | `/api/products/{id}/status` | Alterar estado |
 
-JUnit 5 and Mockito can be used to test:
+### Stock
 
-Product validation.
-Stock entry and withdrawal rules.
-Low-stock calculations.
-Service-layer business logic.
-Error handling.
-Integration Tests
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/api/stock-movements/inbound` | Registar entrada |
+| `POST` | `/api/stock-movements/outbound` | Registar saída |
+| `GET` | `/api/products/{id}/movements` | Consultar histórico |
+| `GET` | `/api/products/low-stock` | Consultar produtos com stock reduzido |
 
-Integration tests should cover:
+### Autenticação
 
-REST API behavior.
-Database persistence.
-Validation and error responses.
-Transaction rollback.
-Authentication and authorization.
-Stock consistency across concurrent operations.
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/api/auth/login` | Autenticar utilizador |
 
-Run the test suite with:
+> Os endpoints apresentados correspondem à proposta inicial da especificação e poderão ser ajustados durante o desenvolvimento, desde que a API mantenha uma estrutura clara e consistente.
 
+---
+
+## 📏 Regras de negócio
+
+### Produtos
+
+- O SKU deve ser único.
+- Os preços não podem ser negativos.
+- A quantidade inicial não pode ser negativa.
+- Um produto desativado não deve receber novas operações comerciais.
+- A eliminação de um produto não pode comprometer o histórico de movimentos.
+
+### Entradas
+
+- A quantidade recebida deve ser válida.
+- A entrada deve ficar associada a um produto.
+- A entrada deve ficar associada ao fornecedor.
+- O utilizador responsável deve ser registado.
+- O registo do movimento e a atualização do stock devem ocorrer na mesma transação.
+
+### Saídas
+
+- A quantidade deve ser superior a zero.
+- Não é permitido retirar mais unidades do que as existentes.
+- A operação deve ficar associada ao utilizador responsável.
+- O sistema deve manter informação suficiente para reconstruir a evolução do stock.
+- Uma operação inválida não pode deixar o inventário parcialmente atualizado.
+
+### Histórico
+
+Os movimentos devem ser tratados como registos de auditoria.
+
+Quando for necessário corrigir uma operação, deverá ser utilizado um mecanismo controlado de correção ou estorno em vez de alterar livremente o movimento original.
+
+---
+
+## 🔐 Segurança
+
+A aplicação possui dois perfis iniciais:
+
+### ADMIN
+
+Pode:
+
+- gerir utilizadores;
+- gerir produtos;
+- gerir fornecedores;
+- gerir categorias;
+- gerir movimentos.
+
+### FUNCIONÁRIO
+
+Pode:
+
+- consultar produtos;
+- registar entradas;
+- registar saídas.
+
+As permissões devem ser aplicadas **no backend**, através do Spring Security, e não apenas através da ocultação de funcionalidades numa eventual interface gráfica.
+
+---
+
+## ✅ Validação e tratamento de erros
+
+Os pedidos da API devem ser validados através de **Bean Validation**.
+
+Exemplos de validações:
+
+```text
+SKU obrigatório
+SKU único
+Nome obrigatório
+Preço >= 0
+Quantidade >= 0
+Stock mínimo >= 0
+Quantidade de saída > 0
+Quantidade de saída <= stock disponível
+```
+
+As respostas de erro devem utilizar códigos HTTP adequados e fornecer informação suficientemente clara para o cliente identificar o problema.
+
+Exemplo:
+
+```json
+{
+  "status": 400,
+  "message": "A quantidade solicitada excede o stock disponível."
+}
+```
+
+---
+
+## 🧪 Testes
+
+O projeto utiliza:
+
+- **JUnit 5**;
+- **Mockito**;
+- testes unitários;
+- testes de integração.
+
+### Cenários principais
+
+Devem ser testados, pelo menos, os seguintes casos:
+
+- criação de produto válido;
+- rejeição de SKU duplicado;
+- entrada de stock;
+- atualização do stock após entrada;
+- saída de stock válida;
+- rejeição de saída superior ao stock;
+- rollback de operações inválidas;
+- associação dos movimentos ao utilizador;
+- controlo de permissões;
+- pesquisa de produtos;
+- paginação;
+- identificação de produtos com stock reduzido.
+
+Executar os testes com:
+
+```bash
 ./mvnw test
+```
 
-Project Roadmap
-Initialize the Spring Boot project.
-Configure PostgreSQL and database migrations.
-Implement product CRUD operations.
-Implement categories and suppliers.
-Add request validation and centralized exception handling.
-Implement stock entries and withdrawals.
-Add stock movement history.
-Implement low-stock queries.
-Add authentication and role-based authorization.
-Write unit and integration tests.
-Document the API with Swagger/OpenAPI.
-Add Docker and Docker Compose support.
-Configure GitHub Actions for continuous integration.
-Add screenshots and a demonstration.
-Deploy a public demo, if an appropriate hosting environment is available.
-Future Improvements
+No Windows:
 
-Potential future enhancements include:
+```powershell
+.\mvnw.cmd test
+```
 
-Purchase order management.
-Barcode scanning.
-Inventory reports and analytics.
-CSV import and export.
-Email notifications for low stock.
-Multi-warehouse support.
-A frontend dashboard.
-Audit logs for sensitive operations.
-Advanced reporting and stock valuation.
-Contributing
+---
 
-This project is developed as a portfolio project to practice Java, Spring Boot, REST API design, database modeling, testing, and software engineering principles.
+## 💻 Pré-requisitos
 
-Suggestions and constructive feedback are welcome.
+Antes de executar o projeto é necessário ter instalado:
 
-To propose a change:
+- Java 21 ou superior;
+- Maven, caso não seja utilizado o Maven Wrapper;
+- PostgreSQL;
+- Git.
 
-Fork the repository.
-Create a feature branch.
-Implement the change and add tests.
-Open a pull request describing the change.
-License
+Opcionalmente:
 
-A license has not yet been selected.
+- Docker;
+- Docker Compose.
 
-Before publishing the project for reuse, choose an appropriate open-source license and add the corresponding LICENSE file.
+Verificar a versão do Java:
 
-StockFlow — Building reliable inventory management software with Java and Spring Boot.
+```bash
+java -version
+```
+
+---
+
+## 🚀 Instalação
+
+Clonar o repositório:
+
+```bash
+git clone <URL_DO_REPOSITORIO>
+```
+
+Entrar na pasta:
+
+```bash
+cd stockflow
+```
+
+Construir o projeto:
+
+```bash
+./mvnw clean install
+```
+
+No Windows:
+
+```powershell
+.\mvnw.cmd clean install
+```
+
+---
+
+## ⚙️ Configuração
+
+A aplicação necessita de uma ligação ao PostgreSQL.
+
+Exemplo de configuração:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/stockflow
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+
+spring.jpa.hibernate.ddl-auto=validate
+
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+> Os valores reais de configuração devem ser definidos através de variáveis de ambiente ou de um ficheiro de configuração local que não seja enviado para o GitHub.
+
+Exemplo:
+
+```text
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=stockflow
+DB_USERNAME=postgres
+DB_PASSWORD=********
+```
+
+**Nunca guardar passwords ou outras credenciais diretamente no repositório.**
+
+---
+
+## ▶️ Execução
+
+Depois de configurar a base de dados, executar:
+
+```bash
+./mvnw spring-boot:run
+```
+
+No Windows:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+Por defeito, a aplicação ficará disponível em:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## 🐳 Docker
+
+O projeto poderá ser executado através de Docker Compose.
+
+Exemplo de arquitetura:
+
+```text
+┌─────────────────┐
+│   StockFlow API │
+│   Spring Boot   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   PostgreSQL    │
+└─────────────────┘
+```
+
+Executar:
+
+```bash
+docker compose up --build
+```
+
+Parar os containers:
+
+```bash
+docker compose down
+```
+
+Para remover também os volumes:
+
+```bash
+docker compose down -v
+```
+
+---
+
+## 📚 Documentação da API
+
+A API deverá ser documentada através de **Swagger/OpenAPI**.
+
+Depois de executar a aplicação, a documentação estará disponível no endpoint configurado pelo projeto.
+
+Exemplo habitual:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+A documentação deverá permitir:
+
+- consultar os endpoints;
+- visualizar parâmetros;
+- consultar modelos de dados;
+- testar pedidos;
+- consultar respostas;
+- compreender os requisitos de autenticação.
+
+---
+
+## 📁 Estrutura do projeto
+
+A estrutura recomendada é:
+
+```text
+stockflow/
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── .../
+│   │   │       ├── controller/
+│   │   │       ├── service/
+│   │   │       ├── repository/
+│   │   │       ├── entity/
+│   │   │       ├── dto/
+│   │   │       ├── exception/
+│   │   │       ├── security/
+│   │   │       └── config/
+│   │   │
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       └── db/
+│   │           └── migration/
+│   │
+│   └── test/
+│       └── java/
+│
+├── .gitignore
+├── docker-compose.yml
+├── pom.xml
+└── README.md
+```
+
+A organização poderá ser adaptada conforme a arquitetura adotada durante o desenvolvimento.
+
+---
+
+## ☑️ Critérios de aceitação
+
+| Requisito | Estado |
+|---|:---:|
+| Criar produto com dados válidos | ⬜ |
+| Rejeitar produtos com SKU duplicado | ⬜ |
+| Registar entrada e atualizar stock | ⬜ |
+| Rejeitar saída superior ao stock | ⬜ |
+| Impedir alterações parciais em operações inválidas | ⬜ |
+| Associar movimentos ao utilizador | ⬜ |
+| Restringir operações de acordo com o perfil | ⬜ |
+| Pesquisa e paginação corretas | ⬜ |
+| Identificação de stock reduzido | ⬜ |
+| Testes automatizados e aplicação configurada | ⬜ |
+
+À medida que cada requisito for implementado e testado, o estado poderá ser alterado para:
+
+```text
+✅ Concluído
+```
+
+---
+
+## 🗺️ Roadmap
+
+### Fase 1 — Planeamento e estrutura
+
+- [ ] Criar repositório GitHub
+- [ ] Criar projeto Spring Boot
+- [ ] Configurar Java 21
+- [ ] Configurar PostgreSQL
+- [ ] Definir entidades
+- [ ] Definir relações
+- [ ] Criar modelo da base de dados
+
+### Fase 2 — Funcionalidades principais
+
+- [ ] Produtos
+- [ ] Categorias
+- [ ] Fornecedores
+- [ ] CRUD
+- [ ] Validações
+- [ ] Pesquisa
+- [ ] Paginação
+
+### Fase 3 — Gestão de stock
+
+- [ ] Entradas
+- [ ] Saídas
+- [ ] Transações
+- [ ] Alertas de stock
+- [ ] Histórico
+- [ ] Auditoria
+
+### Fase 4 — Segurança e testes
+
+- [ ] Spring Security
+- [ ] Autenticação
+- [ ] Perfis ADMIN/FUNCIONÁRIO
+- [ ] Testes unitários
+- [ ] Testes de integração
+- [ ] Testcontainers
+
+### Fase 5 — Finalização
+
+- [ ] Swagger/OpenAPI
+- [ ] Docker Compose
+- [ ] Migrações Flyway
+- [ ] GitHub Actions
+- [ ] Análise estática
+- [ ] Diagrama de entidades
+- [ ] Exemplos de pedidos/respostas
+- [ ] Screenshots/demonstração
+- [ ] Revisão do README
+
+---
+
+## 📊 Estado atual
+
+> 🚧 **Em desenvolvimento**
+
+O projeto encontra-se em desenvolvimento. O objetivo inicial é disponibilizar uma API REST funcional capaz de ligar ao PostgreSQL e permitir criar e consultar produtos com validação e testes básicos.
+
+Posteriormente serão implementados os movimentos de stock, segurança, histórico, auditoria e restantes funcionalidades.
+
+---
+
+## 👨‍💻 Autor
+
+**[Nome do autor]**
+
+Projeto desenvolvido como parte do portefólio académico/profissional.
+
+---
+
+## 📄 Licença
+
+Este projeto poderá ser distribuído ao abrigo da licença:
+
+```text
+Este projeto está licenciado ao abrigo da MIT License.
+
+Copyright (c) 2026 Daniel Silva e Luigy Lima
+
+É permitido utilizar, copiar, modificar, fundir, publicar, distribuir, sublicenciar e/ou vender cópias do software, desde que o aviso de copyright e o texto da licença sejam mantidos nas cópias ou partes substanciais do software.
+```
+
+---
