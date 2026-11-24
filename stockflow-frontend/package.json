@@ -17,8 +17,8 @@
     "start": "set PORT=4000 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test:watch": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
