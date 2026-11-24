@@ -1,0 +1,36 @@
+name: Frontend CI
+on:
+  push:
+    branches:
+      [main, dev]
+  pull_request:
+    branches:
+       [main, dev]
+jobs:
+  frontend-build:
+    name: Frontend Build and Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./stockflow-frontend
+
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node.version: '22'
+            cache: 'npm'
+            cache-dependency-path: ./stockflow-frontend/package-lock.json
+
+        - name: Install dependencies
+          run: npm ci
+
+        - name: run lint
+          run: npm run lint
+
+        - name: run build
+          run: npm run build
